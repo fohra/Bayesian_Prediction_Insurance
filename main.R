@@ -30,4 +30,21 @@ data <- read.csv("data/insurance.csv")
 
 data <- preprocess(data)
 
-data_list <- list(N = length(data$age), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges)
+data_list <- list(N = length(data$age), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges, xpred=25)
+
+#Create model
+sm <- rstan::stan_model(file = "stan_codes/stan_test.stan")
+
+model <- rstan::sampling(sm, data = data_list)
+model
+
+draws_fact <- rstan::extract(model, permuted = T)
+
+draws <- as.data.frame(model)
+
+par(mfrow=c(2,2))
+hist(draws_fact$alpha)
+hist(draws_fact$beta)
+hist(draws_fact$mu)
+hist(draws_fact$ypred)
+
