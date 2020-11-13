@@ -16,6 +16,7 @@ parameters {
   
   real theta_bmi; //hierarchial prior mu for bmi
   real <lower=0> sigma_bmi; //hierarchial prior sigma for bmi
+  real <lower=0> prior_alpha_bmi;
   
   real theta_smoker; //hierarchial prior mu for smoker
   real <lower=0> sigma_smoker; //hierarchial prior sigma for smoker
@@ -32,8 +33,9 @@ model {
   theta_sex ~ normal(100 , 50);
   sigma_sex ~ cauchy(0, 40);
   
-  theta_bmi ~ normal(100 , 50);
-  sigma_bmi ~ cauchy(0, 40);
+  theta_bmi ~ skew_normal(50, 50, 0.5);
+  sigma_bmi ~ cauchy(0, 50);
+  prior_alpha_bmi ~ normal(0, 1);
   
   theta_smoker ~ normal(100 , 50);
   sigma_smoker ~ cauchy(0, 40);
@@ -43,7 +45,7 @@ model {
   
   age ~ normal ( theta_age, sigma_age);
   sex ~ normal ( theta_sex, sigma_sex);
-  bmi ~ normal ( theta_bmi, sigma_bmi);
+  bmi ~ skew_normal( theta_bmi, sigma_bmi, prior_alpha_bmi);
   smoker ~ normal ( theta_smoker, sigma_smoker);
   insurance ~ normal ( theta_insurance, sigma_insurance);
 }
@@ -57,7 +59,7 @@ generated quantities {
   
   age_pred = normal_rng ( theta_age , sigma_age);
   sex_pred = normal_rng ( theta_sex , sigma_sex);
-  bmi_pred = normal_rng ( theta_bmi , sigma_bmi);
+  bmi_pred = skew_normal_rng ( theta_bmi , sigma_bmi, prior_alpha_bmi);
   smoker_pred = normal_rng ( theta_smoker , sigma_smoker);
   insurance_pred = normal_rng ( theta_insurance , sigma_insurance);
 }
