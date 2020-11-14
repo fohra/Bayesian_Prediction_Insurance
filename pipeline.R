@@ -1,8 +1,21 @@
 #Sets the working directory the folder where the script is
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+library(e1071)
+library(aaltobda)
+library(rstan)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+rstan_options(auto_write = TRUE)
+options(mc.cores = 1)
+library(loo)
+library(gridExtra)
+library(rprojroot)
+library(rstanarm)
 
 #load libraries, functions and data
 source("data/preprocess.R")
+source("data/loo_diagnostics.R")
 data <- read.csv("data/insurance.csv")
 #original data 
 #     *age: int
@@ -32,17 +45,6 @@ data
 data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, insurance=data$charges)
 data_list
 
-# BMI
-bmi_mean <- mean(data$bmi)
-bmi_var <- var(data$bmi)
-bmi_skew <- skewness(data$bmi)
-bmi_kurt <- kurtosis(data$bmi)
-print(bmi_mean)
-print(bmi_var)
-print(bmi_skew)
-print(bmi_kurt)
-
-hist(data$bmi, breaks=20)
 
 #Create model [Hierarchial]
 sm_hierarchial <- rstan::stan_model(file = "stan_codes/stan_hierarchial.stan")
@@ -81,5 +83,8 @@ hist(draws_fact_pooled$smoker, breaks=20)
 
 
 hist(draws_fact_pooled$insurance)
+
+parameter_name = 'log_lik_insurance'
+loo_diagnostics(model_hierarchial, parameter_name)
 
 
