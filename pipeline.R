@@ -7,7 +7,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 rstan_options(auto_write = TRUE)
-options(mc.cores = 1)
+options(mc.cores = 4)
 library(loo)
 library(gridExtra)
 library(rprojroot)
@@ -19,19 +19,19 @@ source("data/loo_diagnostics.R")
 data <- read.csv("data/insurance.csv")
 data <- preprocess(data)
 
-#Else
-#     *stancodes
-#     *after that? plots? evaluation of model results
-
 
 #########################
 ######### MAIN ##########
 #########################
 
-main <- function(data, model_path, test=FALSE){
+main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
   #Awful if-else statements included so that fast test run can be run
   if (test){
     data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges, xpred = 25)
+  }
+  else if (lin_reg){
+    data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges, 
+                      pred_age = 25, pred_sex=1, pred_bmi=20, pred_smoker=1)
   }
   else{
     data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, insurance=data$charges)
@@ -55,7 +55,19 @@ main <- function(data, model_path, test=FALSE){
     par(mfrow=c(1,1))
     hist(draws$ypred, breaks=20)
   }
-  
+  else if (lin_reg){
+    par(mfrow=c(2,3))
+    hist(draws$alpha, breaks=20)
+    hist(draws$beta_age, breaks=20)
+    hist(draws$beta_sex, breaks=20)
+    hist(draws$beta_bmi, breaks=20)
+    hist(draws$beta_smoker, breaks=20)
+    hist(draws$sigma, breaks=20)
+    
+    par(mfrow=c(1,2))
+    hist(draws$mu, breaks=20)
+    hist(draws$ypred, breaks=20)
+  }
   else{
     par(mfrow=c(2,2))
     hist(draws$age, breaks=20)
@@ -65,15 +77,29 @@ main <- function(data, model_path, test=FALSE){
     
     par(mfrow=c(1,1))
     hist(draws$insurance, breaks=20)
+    
+    parameter_name = 'log_lik_insurance'
+    loo_diagnostics(model, parameter_name)
   }
-  
-  parameter_name = 'log_lik_insurance'
-  loo_diagnostics(model, parameter_name)
 }
 
+#########################
+####### LIN_REG #########
+#########################
 
-hopo <- main(data, "stan_codes/stan_test.stan", TRUE)
+main(data, "stan_codes/stan_lin_reg_uni.stan", lin_reg = TRUE)
 
+
+
+#########################
+#### HIE & POOLED #######
+#########################
 main(data, "stan_codes/stan_hierarchial.stan")
 
 main(data, "stan_codes/stan_pooled.stan")
+
+
+#########################
+######### TEST ##########
+#########################
+main(data, "stan_codes/stan_test.stan", TRUE)
