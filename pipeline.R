@@ -17,74 +17,63 @@ library(rstanarm)
 source("data/preprocess.R")
 source("data/loo_diagnostics.R")
 data <- read.csv("data/insurance.csv")
-#original data 
-#     *age: int
-#     *sex: factor female/male
-#     *bmi: num(float?)
-#     *smoker: factor
-#     *charges: num(float?)
-
-#preprocessing (SIMPLE READY)
-#     *separate file for preprocessing in data/preprocess.R
-#     *push data into there -> get preprocessed data, a dataframe?
-#     *delete children & region
-#     *Check if crazy outliers(NOT YET)
-#     *factors into 0,1 in smoker and sex
+data <- preprocess(data)
 
 #Else
-#     *List all of the covariates into list for the stanfit
-#     *Call stanfit
 #     *stancodes
 #     *after that? plots? evaluation of model results
-#     *arguments for running different files
-#     *think about saving stan fit so no time in compilation lost!!!
-#     more info here https://discourse.mc-stan.org/t/saving-and-sharing-an-rstan-model-fit/1059
-
-data <- preprocess(data)
-data
-data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, insurance=data$charges)
-data_list
 
 
-#Create model [Hierarchial]
-sm_hierarchial <- rstan::stan_model(file = "stan_codes/stan_hierarchial.stan")
+#########################
+######### MAIN ##########
+#########################
 
-model_hierarchial <- rstan::sampling(sm_hierarchial, data = data_list)
-model_hierarchial
+main <- function(data, model_path, test=FALSE){
+  #Awful if-else statements included so that fast test run can be run
+  if (test){
+    data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges, xpred = 25)
+  }
+  else{
+    data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, insurance=data$charges)
+  }
+  
+  #Create model 
+  sm <- rstan::stan_model(file = model_path)
+  
+  model <- rstan::sampling(sm, data = data_list)
+  print(model)
+  
+  draws <- rstan::extract(model, permuted = T)
+  
+  if (test){
+    par(mfrow=c(2,2))
+    hist(draws$alpha, breaks=20)
+    hist(draws$beta, breaks=20)
+    hist(draws$sigma, breaks=20)
+    hist(draws$mu, breaks=20)
+    
+    par(mfrow=c(1,1))
+    hist(draws$ypred, breaks=20)
+  }
+  
+  else{
+    par(mfrow=c(2,2))
+    hist(draws$age, breaks=20)
+    hist(draws$sex, breaks=20)
+    hist(draws$bmi, breaks=20)
+    hist(draws$smoker, breaks=20)
+    
+    par(mfrow=c(1,1))
+    hist(draws$insurance, breaks=20)
+  }
+  
+  parameter_name = 'log_lik_insurance'
+  loo_diagnostics(model, parameter_name)
+}
 
-draws_fact_hierarchial <- rstan::extract(model_hierarchial, permuted = T)
 
-draws_hierarchial <- as.data.frame(model_hierarchial)
+hopo <- main(data, "stan_codes/stan_test.stan", TRUE)
 
-par(mfrow=c(2,2))
-hist(draws_fact_hierarchial$age, breaks=20)
-hist(draws_fact_hierarchial$sex, breaks=20)
-hist(draws_fact_hierarchial$bmi, breaks=20)
-hist(draws_fact_hierarchial$smoker, breaks=20)
+main(data, "stan_codes/stan_hierarchial.stan")
 
-
-hist(draws_fact_hierarchial$insurance, breaks=20)
-
-#Create model [Pooled]
-sm_pooled <- rstan::stan_model(file = "stan_codes/stan_pooled.stan")
-
-model_pooled <- rstan::sampling(sm_pooled, data = data_list)
-model_pooled
-
-draws_fact_pooled <- rstan::extract(model_pooled, permuted = T)
-
-draws_pooled <- as.data.frame(model_pooled)
-
-par(mfrow=c(2,2))
-hist(draws_fact_pooled$age, breaks=20)
-hist(draws_fact_pooled$sex, breaks=20)
-hist(draws_fact_pooled$bmi, breaks=20)
-hist(draws_fact_pooled$smoker, breaks=20)
-
-
-hist(draws_fact_pooled$insurance)
-
-parameter_name = 'log_lik_insurance'
-loo_diagnostics(model_hierarchial, parameter_name)
-
-
+main(data, "stan_codes/stan_pooled.stan")
