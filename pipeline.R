@@ -7,7 +7,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 rstan_options(auto_write = TRUE)
-options(mc.cores = 4)
+options(mc.cores = parallel::detectCores())
 library(loo)
 library(gridExtra)
 library(rprojroot)
@@ -18,7 +18,6 @@ source("data/preprocess.R")
 source("data/loo_diagnostics.R")
 data <- read.csv("data/insurance.csv")
 data <- preprocess(data)
-
 
 #########################
 ######### MAIN ##########
