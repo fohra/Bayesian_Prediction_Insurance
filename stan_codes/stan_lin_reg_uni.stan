@@ -29,5 +29,11 @@ model {
 }
 
 generated quantities {
+  vector[N] log_lik;
   real ypred = normal_rng(alpha + beta_age*pred_age + beta_sex*pred_sex + beta_bmi*pred_bmi + beta_smoker*pred_smoker, sigma);
+  int i=1;
+  for(n in 1:N){
+        log_lik[i] = normal_lpdf(y[n] | mu, sigma);
+        i=i+1;
+  }
 }

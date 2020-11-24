@@ -16,8 +16,9 @@ library(rstanarm)
 #load libraries, functions and data
 source("data/preprocess.R")
 source("data/loo_diagnostics.R")
-data <- read.csv("data/insurance.csv")
-data <- preprocess(data)
+#data <- read.csv("data/insurance.csv")
+#data <- preprocess(data)
+data<- read.csv("data/preprocessed_data.csv")
 
 #########################
 ######### MAIN ##########
@@ -66,6 +67,8 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
     par(mfrow=c(1,2))
     hist(draws$mu, breaks=20)
     hist(draws$ypred, breaks=20)
+    parameter_name = 'log_lik'
+    loo_diagnostics(model, parameter_name)
   }
   else{
     par(mfrow=c(2,2))
@@ -80,14 +83,15 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
     parameter_name = 'log_lik_insurance'
     loo_diagnostics(model, parameter_name)
   }
+  return(model)
 }
 
 #########################
 ####### LIN_REG #########
 #########################
 
-main(data, "stan_codes/stan_lin_reg_uni.stan", lin_reg = TRUE)
-
+model <- main(data, "stan_codes/stan_lin_reg_uni.stan", lin_reg = TRUE)
+model <- main(data, "stan_codes/stan_lin_reg_pooled.stan", lin_reg = TRUE)
 
 
 #########################
