@@ -22,7 +22,7 @@ data <- preprocess(data)
 ######### MAIN ##########
 #########################
 
-main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
+main <- function(data, model_path, test=FALSE, lin_reg=FALSE, iter=2000, warm_up = floor(iter/2), a_delta = 0.8){
   #Awful if-else statements included so that fast test run can be run
   if (test){
     data_list <- list(N = nrow(data), age = data$age, sex=data$sex, bmi=data$bmi, smoker=data$smoker, y=data$charges, xpred = 25)
@@ -38,7 +38,7 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
   #Create model 
   sm <- rstan::stan_model(file = model_path)
   
-  model <- rstan::sampling(sm, data = data_list)
+  model <- rstan::sampling(sm, data = data_list, iter = iter, warmup = warm_up, control = list(adapt_delta = a_delta))
   print(model)
   
   draws <- rstan::extract(model, permuted = T)
@@ -87,7 +87,7 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE){
 #########################
 ####### LIN_REG #########
 #########################
-model1 <- main(data, "stan_codes/stan_lin_reg_hierarchial.stan", lin_reg = TRUE)
+model1 <- main(data, "stan_codes/stan_lin_reg_hierarchial.stan", lin_reg = TRUE, iter = 12000, warm_up = 2000, a_delta = 0.99)
 model2 <- main(data, "stan_codes/stan_lin_reg_pooled.stan", lin_reg = TRUE)
 
 
