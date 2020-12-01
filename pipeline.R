@@ -7,7 +7,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 rstan_options(auto_write = TRUE)
-options(mc.cores = 4)
+options(mc.cores = parallel::detectCores())
 library(loo)
 
 
@@ -57,7 +57,7 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE, iter=2000, warm_up
     par(mfrow=c(2,3))
     hist(draws$alpha, breaks=20)
     hist(draws$beta_age, breaks=20)
-    hist(draws$beta_sex, breaks=20)
+    #hist(draws$beta_sex, breaks=20)
     hist(draws$beta_bmi, breaks=20)
     hist(draws$beta_smoker, breaks=20)
     hist(draws$sigma, breaks=20)
@@ -89,8 +89,9 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE, iter=2000, warm_up
 #########################
 model1 <- main(data, "stan_codes/stan_lin_reg_hierarchial.stan", lin_reg = TRUE, iter = 12000, warm_up = 2000, a_delta = 0.99)
 model2 <- main(data, "stan_codes/stan_lin_reg_pooled.stan", lin_reg = TRUE)
+model3 <- main(data, "stan_codes/hie_not_sex.stan", lin_reg = TRUE)
 
-
+monitor(model3)
 
 #########################
 #### HIE & POOLED #######
