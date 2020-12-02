@@ -90,6 +90,8 @@ main <- function(data, model_path, test=FALSE, lin_reg=FALSE, iter=2000, warm_up
 model1 <- main(data, "stan_codes/stan_lin_reg_hierarchial.stan", lin_reg = TRUE, iter = 12000, warm_up = 2000, a_delta = 0.99)
 model2 <- main(data, "stan_codes/stan_lin_reg_pooled.stan", lin_reg = TRUE)
 model3 <- main(data, "stan_codes/hie_not_sex.stan", lin_reg = TRUE)
+model4 <- main(data, "stan_codes/hie_398.stan", lin_reg = TRUE)
+model5 <- main(data, "stan_codes/hie_not_sex_398.stan", lin_reg = TRUE)
 
 monitor(model3)
 
