@@ -17,7 +17,7 @@ plot_5 <- function(draws){
   p4 <- plot_hist_with_dnm(draws$beta_bmi) + ggtitle("beta_bmi")
   
   p5 <- plot_hist_with_dnm(draws$beta_smoker) + ggtitle("beta_smoker")
-  p6 <- plot_hist_with_dnm(draws$children) + ggtitle("children")
+  p6 <- plot_hist_with_dnm(draws$beta_children) + ggtitle("children")
   
   p7 <- plot_hist_with_dnm(mu$value) + ggtitle("mu")
   p8 <- plot_hist_with_dnm(draws$ypred) + ggtitle("ypred")
@@ -43,7 +43,7 @@ plot_4_no_sex <- function(draws){
   p4 <- plot_hist_with_dnm(draws$beta_bmi) + ggtitle("beta_bmi")
   
   p5 <- plot_hist_with_dnm(draws$beta_smoker) + ggtitle("beta_smoker")
-  p6 <- plot_hist_with_dnm(draws$children) + ggtitle("children")
+  p6 <- plot_hist_with_dnm(draws$beta_children) + ggtitle("children")
   
   p7 <- plot_hist_with_dnm(mu$value) + ggtitle("mu")
   p8 <- plot_hist_with_dnm(draws$ypred) + ggtitle("ypred")
@@ -113,4 +113,5 @@ plot_3 <- function(draws){
                           c(7,7))
   )
 }
+
 
