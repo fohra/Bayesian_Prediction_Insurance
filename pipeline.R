@@ -14,6 +14,8 @@ library(loo)
 #load libraries, functions and data
 source("data/preprocess.R")
 source("data/loo_diagnostics.R")
+source("plotting_functions.R")
+
 data <- read.csv("data/insurance.csv")
 data <- preprocess(data)
 
