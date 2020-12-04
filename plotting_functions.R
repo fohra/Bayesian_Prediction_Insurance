@@ -108,9 +108,8 @@ plot_3 <- function(draws){
     widths = c(1, 1),
     layout_matrix = rbind(c(1, 2),
                           c(3,4),
-                          c(5,NA),
-                          c(6,6),
-                          c(7,7))
+                          c(5,5),
+                          c(6,6))
   )
 }
 
