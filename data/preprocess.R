@@ -1,7 +1,7 @@
 preprocess <- function(data){
   #data: dataframe (age, sex, bmi, children, smoker, region, charges)
   #drop children, region
-  data <- subset(data, select = -c(children, region))
+  data <- subset(data, select = -c(region))
   #change sex and smoker from factors to numerical
   data$sex[data$sex == 'female'] <- as.numeric(0) 
   data$sex[data$sex == 'male'] <- as.numeric(1)
