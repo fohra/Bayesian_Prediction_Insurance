@@ -126,4 +126,9 @@ draws <- rstan::extract(model, permuted = T)
 #                  data$children==children & data$sex==sex & data$smoker==0 ]
 p5 <-plot_vald(draws,data,age,bmi,children,sex,smoker) +ggtitle("person 5")
 
-
+grid.arrange(
+  p1,p2,p3,p4,p5,
+  widths = c(1, 1),
+  layout_matrix = rbind(c(1, 2),
+                        c(3,4),
+                        c(5,NA)))
