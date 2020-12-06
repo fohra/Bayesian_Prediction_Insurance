@@ -113,4 +113,12 @@ plot_3 <- function(draws){
   )
 }
 
-
+plot_vald <- function(draw,data,age,bmi,children,sex,smoker){
+  data <- data$charges[data$age<=age+2 & data$age>=age-2 & data$bmi<=bmi+5 & data$bmi>=bmi-5 &
+                         data$children==children & data$sex==sex & data$smoker==smoker]
+  p <- ggplot(as.data.frame(draw),aes(x=draw$ypred)) +
+    geom_density(alpha=.4, fill="#E69F00") +
+    geom_vline(data=as.data.frame(data),aes(xintercept=data),
+                     color="blue", linetype="dashed", size=1)
+  return (p)
+}
